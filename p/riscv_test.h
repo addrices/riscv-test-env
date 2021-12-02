@@ -164,9 +164,11 @@
         .globl _start;                                                  \
 _start:                                                                 \
         /* reset vector */                                              \
-        j reset_vector;                                                 \
+        /*j reset_vector;*/                                                 \
+        INIT_XREG                                                       \
         .align 2;                                                       \
-trap_vector:                                                            \
+
+//trap_vector:                                                            \
         /* test whether the test came from pass/fail */                 \
         csrr t5, mcause;                                                \
         li t6, CAUSE_USER_ECALL;                                        \
@@ -235,7 +237,10 @@ reset_vector:                                                           \
 //-----------------------------------------------------------------------
 
 #define RVTEST_PASS                                                     \
-        fence;                                                          \
+        li a0, 0xc0ffee; \
+        .word 0xdead10cc
+
+//        fence;                                                          \
         li TESTNUM, 1;                                                  \
         li a7, 93;                                                      \
         li a0, 0;                                                       \
@@ -243,7 +248,10 @@ reset_vector:                                                           \
 
 #define TESTNUM gp
 #define RVTEST_FAIL                                                     \
-        fence;                                                          \
+        li a0, 0xdeaddead; \
+        .word 0xdead10cc
+
+//        fence;                                                          \
 1:      beqz TESTNUM, 1b;                                               \
         sll TESTNUM, TESTNUM, 1;                                        \
         or TESTNUM, TESTNUM, 1;                                         \
